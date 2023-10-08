@@ -10,31 +10,31 @@
 using namespace std;
 
 // Functions
-string genShiftedString (string ogCipher, int shift);
-int countCoincidences (string ogCipher, string cmpString);
+string genShiftedString (const string ogCipher, const int shift);
+int countCoincidences (const string ogCipher, const string cmpString, const int shift);
 
 int main()
 {
   return 0;
 }
 
-string genShiftedString (string ogCipher, int shift)
+string genShiftedString (const string ogCipher, const int shift)
 {
   string shiftString;
-  int j = 0;
-  for ( int i = shift; i < ogCipher.length(); i++ )
+  for ( int i = 0; i < ogCipher.length() - shift; i++ )
   {
-    shiftString[j++] = ogCipher[i];
+    shiftString[i] = ogCipher[i];
   }
   return shiftString;
 }
 
-int countCoincidences (string ogCipher, string cmpString)
+int countCoincidences (const string ogCipher, const string cmpString, const int shift)
 {
   int cnt = 0;
+  int j = shift;
   for ( int i = 0; i < cmpString.length(); i++ )
   {
-    if ( ogCipher[i] == cmpString[i] ) cnt++;
+    if ( cmpString[i] == ogCipher[j++] ) cnt++;
   }
   return cnt;
 }
