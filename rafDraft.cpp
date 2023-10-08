@@ -69,7 +69,7 @@ int main() {
     
     // Try all possible keys (key space: {0,..,26}^t)
     for (int t = 1; t <= ciphertext.length(); ++t) {
-        for (int key = 0; key < t; ++key) {
+        for (int key = 1; key <= t; ++key) {
             std::string keyStr;
             
             // Convert key number to base-27 string
