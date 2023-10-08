@@ -18,8 +18,8 @@ int guessKeyLength(const vector<int> coincidenceCount, const int maxLength);
 int main()
 {
   // read in file
-  ifstream cTextStream("dummy.txt");
-  string cText( ( istreambuf_iterator<char>(cTextStream) ),
+  ifstream ifs("cipher.txt");
+  string cText( ( istreambuf_iterator<char>(ifs) ),
                 ( istreambuf_iterator<char>() ) );
 
   // for length of string, count coincidences of resulting shift of i
@@ -31,8 +31,8 @@ int main()
   }
 
   // DEBUG: print result
-  cout << "key length guess:" << guessKeyLength(coincidences, 24) << endl; // BAD BAD BAD hard code numbeer go to jail
-  //cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
+  //cout << "key length guess:" << guessKeyLength(coincidences, 24) << endl; // BAD BAD BAD hard code numbeer go to jail
+  cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
 
   return 0;
 }
@@ -77,6 +77,7 @@ int guessKeyLength(const vector<int> coincidenceCount, const int maxLength)
     {
       guess = i;
       mean = totalCoincidences/denominator;
+      cout<<'\n'<<i<<':'<<totalCoincidences<<'/'<<denominator<<'='<<mean<<endl;
     }
   }
 
