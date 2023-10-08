@@ -82,6 +82,7 @@ int main() {
             
             // Decrypt the ciphertext using the current key
             std::string plaintext = decrypt(ciphertext, keyStr);
+            if (bestGuess.empty()) { bestGuess = plaintext; }
             
             // Score the plaintext
             int score = scorePlaintext(plaintext, dictionary);
