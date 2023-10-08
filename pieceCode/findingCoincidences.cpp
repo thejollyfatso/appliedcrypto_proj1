@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 
-using namespace std
+using namespace std;
 
 // Functions
 string genShiftedString (string ogCipher, int shift);
@@ -34,7 +34,7 @@ int countCoincidences (string ogCipher, string cmpString)
   int cnt = 0;
   for ( int i = 0; i < cmpString.length(); i++ )
   {
-    if ogCipher[i] == cmpString[i] cnt++;
+    if ( ogCipher[i] == cmpString[i] ) cnt++;
   }
   return cnt;
 }
