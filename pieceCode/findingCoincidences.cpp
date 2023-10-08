@@ -31,7 +31,8 @@ int main()
   }
 
   // DEBUG: print result
-  cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
+  cout << "key length guess:" << guessKeyLength(coincidences, 24) << endl; // BAD BAD BAD hard code numbeer go to jail
+  //cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
 
   return 0;
 }
@@ -72,7 +73,11 @@ int guessKeyLength(const vector<int> coincidenceCount, const int maxLength)
       denominator++;
     }
     
-    if ( mean < totalCoincidences/denominator ) guess = i;
+    if ( mean < totalCoincidences/denominator )
+    {
+      guess = i;
+      mean = totalCoincidences/denominator;
+    }
   }
 
   return guess;
