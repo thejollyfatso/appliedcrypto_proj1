@@ -13,6 +13,7 @@ using namespace std;
 // Functions
 string genShiftedString (const string ogCipher, const int shift);
 int countCoincidences (const string ogCipher, const string cmpString, const int shift);
+int guessKeyLength(const vector<int> coincidenceCount, const int maxLength);
 
 int main()
 {
@@ -29,12 +30,8 @@ int main()
     coincidences.push_back(countCoincidences(cText, shiftedString, i));
   }
 
-  // DEBUG: print resulting coincidence vector
-  for ( int i = 0; i < coincidences.size(); i++ )
-  {
-    cout << coincidences[i] << " ";
-  }
-  cout << endl;
+  // DEBUG: print result
+  cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
 
   return 0;
 }
@@ -58,4 +55,25 @@ int countCoincidences (const string ogCipher, const string cmpString, const int 
     if ( cmpString[i] == ogCipher[j++] ) cnt++;
   }
   return cnt;
+}
+
+int guessKeyLength(const vector<int> coincidenceCount, const int maxLength)
+{
+  int guess;
+  int mean = 0;
+
+  for ( int i = 1; i < maxLength; i++ )
+  {
+    int totalCoincidences = 0;
+    int denominator = 0;
+    for ( int j = 0; j < coincidenceCount.size(); j += i )
+    {
+      totalCoincidences += coincidenceCount[j];
+      denominator++;
+    }
+    
+    if ( mean < totalCoincidences/denominator ) guess = i;
+  }
+
+  return guess;
 }
