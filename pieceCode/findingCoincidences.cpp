@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -15,6 +16,10 @@ int countCoincidences (const string ogCipher, const string cmpString, const int 
 
 int main()
 {
+  ifstream cTextStream("dummy.txt");
+  string cText( ( istreambuf_iterator<char>(cTextStream) ),
+                ( istreambuf_iterator<char>() ) );
+  cout << cText << endl;
   return 0;
 }
 
