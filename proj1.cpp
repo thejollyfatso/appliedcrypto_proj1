@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-
 #include <algorithm>
 #include <cmath>
 
@@ -26,49 +25,22 @@ float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
 
 const string decryptMessage(const string& ciphertext, const string& key);
 char decryptCharacter(char cipherChar, char keyChar);
+int scorePlaintext(const string& plaintext, const vector<string>& dictionary);
 
-/* From Akash's old code, a scoring function to try */
-// Function to calculate the score of a plaintext based on word frequency
-int scorePlaintext(const string& plaintext, const vector<string>& dictionary) {
-    int score = 0;
-    string word = "";
-    
-    for (char c : plaintext) {
-        if (c == ' ') {
-            // Check if the word is in the dictionary
-            if (find(dictionary.begin(), dictionary.end(), word) != dictionary.end()) {
-                score++;
-            }
-            word = "";
-        } else {
-            word += c;
-        }
-    }
-    
-    return score;
-}
 
 int main()
 {
   // read in ciphertext to string cText
-  // DEBUG: there is something wrong with reading in files rn
-  ifstream ifsC("cipher.txt");
-  string cText( ( istreambuf_iterator<char>(ifsC) ),
-                ( istreambuf_iterator<char>() ) );
-  ifsC.close();
-  cText.pop_back(); // DEBUG: get rid of superfluous newline character?
-  /*
   ifstream ifsC("cipher.txt");
   if (!ifsC)
   {
     cerr << "Could not open the file.\n";
     exit(1);
   }
-
-  string cText;
-  getline(ifsC, cText);
+  string cText( ( istreambuf_iterator<char>(ifsC) ),
+                ( istreambuf_iterator<char>() ) );
   ifsC.close();
-  */
+  cText.pop_back(); // get rid of superfluous newline character
 
   /* Coincidence Indexing to determine likely key lengths */
   // for length of string, count coincidences b/w resulting shift of i
@@ -87,10 +59,20 @@ int main()
 
   // read dictionaries into strings
   ifstream ifsD1("plaintext_dictionary_test1.txt");
+  if (!ifsD1)
+  {
+    cerr << "Could not open the file.\n";
+    exit(1);
+  }
   string dict1( ( istreambuf_iterator<char>(ifsD1) ),
                 ( istreambuf_iterator<char>() ) );
   ifsD1.close();
   ifstream ifsD2("plaintext_dictionary_test2.txt");
+  if (!ifsD2)
+  {
+    cerr << "Could not open the file.\n";
+    exit(1);
+  }
   string dict2( ( istreambuf_iterator<char>(ifsD2) ),
                 ( istreambuf_iterator<char>() ) );
   ifsD2.close();
@@ -141,16 +123,13 @@ int main()
     keys.push_back(candidateKey);
   }
 
-  // DEBUG: Currently outputs series of guesses. Will need to score most accurate one somehow.
-  /*
-  for ( auto key : keys )
-  {
-    cout << "Using key: " << key << endl << "My plaintext guess is: " << decryptMessage(cText, key) << endl << endl;
-  }
-  */
-
-    // Load dictionaries for scoring
+  // Load both dictionary files into vector of strings for a compiled dictionary
   ifstream dictionaryFile("plaintext_dictionary_test1.txt");
+  if (!dictionaryFile)
+  {
+    cerr << "Could not open the file.\n";
+    exit(1);
+  }
   vector<string> dictionary;
   string word;
   while (dictionaryFile >> word) {
@@ -158,10 +137,16 @@ int main()
   }
   dictionaryFile.close();
   ifstream dictionaryFile2("plaintext_dictionary_test2.txt");
+  if (!dictionaryFile2)
+  {
+    cerr << "Could not open the file.\n";
+    exit(1);
+  }
     while (dictionaryFile2 >> word) {
       dictionary.push_back(word);
   }
   dictionaryFile2.close();
+
   // Find key with best score
   int bestScore = 0;
   string bestGuess;
@@ -384,3 +369,25 @@ char decryptCharacter(char cipherChar, char keyChar)
   return decryptedChar;
 }
 
+/* 
+  Takes in decoded text and a dictionary of words and returns int score
+  based on how many words from the text are found in dictionary.
+*/
+int scorePlaintext(const string& plaintext, const vector<string>& dictionary) {
+  int score = 0;
+  string word = "";
+    
+  for (char c : plaintext) {
+    if (c == ' ') {
+      // Check if the word is in the dictionary
+      if (find(dictionary.begin(), dictionary.end(), word) != dictionary.end()) {
+          score++;
+      }
+      word = "";
+    } else {
+      word += c;
+    }
+  }
+    
+    return score;
+}
