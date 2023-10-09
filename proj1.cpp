@@ -27,6 +27,13 @@ char decryptCharacter(char cipherChar, char keyChar);
 int main()
 {
   // read in ciphertext to string cText
+  // DEBUG: there is something wrong with reading in files rn
+  ifstream ifsC("cipher.txt");
+  string cText( ( istreambuf_iterator<char>(ifsC) ),
+                ( istreambuf_iterator<char>() ) );
+  ifsC.close();
+  cText.pop_back(); // DEBUG: get rid of superfluous newline character?
+  /*
   ifstream ifsC("cipher.txt");
   if (!ifsC)
   {
@@ -37,6 +44,7 @@ int main()
   string cText;
   getline(ifsC, cText);
   ifsC.close();
+  */
 
   /* Coincidence Indexing to determine likely key lengths */
   // for length of string, count coincidences b/w resulting shift of i
