@@ -11,15 +11,15 @@ using namespace std;
 // Globals
 string LSYMBOLS = " abcdefghijklmnopqrstuvwxyz";
 
-/* Function Declarations */
-vector<int> genLSymbolFrequency (const string lstring);
-vector<int> genShiftedVector (const vector<int> ogVector, const int shift);
+/* Function Prototypes */
+vector<float> genLSymbolFrequency (const string lstring);
+vector<float> genShiftedVector (const vector<float> ogVector, const int shift);
 string genShiftedString (const string ogCipher, const int shift);
 
 int countCoincidences (const string ogCipher, const string cmpString, const int shift);
 vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int maxLength);
 
-int getFrequencyProduct (const vector<int> freq1, const vector<int> freq2);
+float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2);
 
 const string decryptMessage(const string& ciphertext, const string& key);
 char decryptCharacter(char cipherChar, char keyChar);
@@ -64,8 +64,8 @@ int main()
   ifsD2.close();
 
   // get dict1,dict2 frequencies then combine into first
-  vector<int> trueFreq = genLSymbolFrequency(dict1);
-  vector<int> dict2Freq = genLSymbolFrequency(dict2);
+  vector<float> trueFreq = genLSymbolFrequency(dict1);
+  vector<float> dict2Freq = genLSymbolFrequency(dict2);
   for ( int i = 0; i < 27; i++ )
   {
     trueFreq[i] += dict2Freq[i];
@@ -88,13 +88,13 @@ int main()
       }
 
       // find the most likely "shift" of L-symbol frequency
-      vector<int> substrFreq = genLSymbolFrequency(substring);
-      int maxFreq = 0;
-      int guess;
+      vector<float> substrFreq = genLSymbolFrequency(substring);
+      float maxFreq = 0;
+      int guess = 0;
       for ( int i = 0; i < 27; i++ )
       {
         // comparing each possible shift of the substring to true frequency
-        int freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
+        float freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
         if ( freqProd > maxFreq ) 
         {
           maxFreq = freqProd;
@@ -119,25 +119,36 @@ int main()
 
 /* Function Definitions */
 
-vector<int> genLSymbolFrequency (const string lstring)
+/*
+  Takes a string and scans through for occurrences of each L-symbol.
+  Returns a length-27 vector of integers uh oh lmao
+*/
+vector<float> genLSymbolFrequency (const string lstring)
 {
-  vector<int> freqs(27);
+  vector<float> occurrences(27);
   int lIndex; // ascii converted to index within LSYMBOLS
   for ( auto c : lstring )
   {
     if ( LSYMBOLS.find(c) != string::npos )
     {
       lIndex = (c == ' ') ? 0 : (int(c) - 'a' + 1);
-      freqs[lIndex] += 1;
+      occurrences[lIndex] += 1;
     }
+  }
+
+  // converting from occurrences to frequencies
+  vector<float> freqs(27);
+  for ( int i = 0; i < 27; i++ )
+  {
+    freqs[i] = occurrences[i]/lstring.length();
   }
 
   return freqs;
 }
 
-vector<int> genShiftedVector (const vector<int> ogVector, const int shift)
+vector<float> genShiftedVector (const vector<float> ogVector, const int shift)
 {
-  vector<int> shiftVec;
+  vector<float> shiftVec;
   for ( int i = shift; i < ogVector.size(); i++ )
   {
     shiftVec.push_back(ogVector[i]);
@@ -200,7 +211,7 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
 
   for ( int i = 0; i < candidateGuesses.size(); i++ )
   {
-    for ( int j = 2; j < candidateGuesses[i]; j++)  // keep note of j set to 2
+    for ( int j = 1; j < candidateGuesses[i]; j++)  
     {
       if ( candidateGuesses[i] % j == 0) factors[j] += 1;
     }
@@ -218,9 +229,9 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
   return guesses;
 }
 
-int getFrequencyProduct (const vector<int> freq1, const vector<int> freq2)
+float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
 {
-  int prodSum = 0;
+  float prodSum = 0;
   for ( int i = 0; i < 27; i++ )
   {
     prodSum += freq1[i] * freq2[i];
