@@ -27,10 +27,16 @@ char decryptCharacter(char cipherChar, char keyChar);
 int main()
 {
   // read in ciphertext to string cText
-  ifstream ifs("cipher.txt");
-  string cText( ( istreambuf_iterator<char>(ifs) ),
-                ( istreambuf_iterator<char>() ) );
-  ifs.close();
+  ifstream ifsC("cipher.txt");
+  if (!ifsC)
+  {
+    cerr << "Could not open the file.\n";
+    exit(1);
+  }
+
+  string cText;
+  getline(ifsC, cText);
+  ifsC.close();
 
   /* Coincidence Indexing to determine likely key lengths */
   // for length of string, count coincidences b/w resulting shift of i
@@ -48,14 +54,15 @@ int main()
   // get true frequency of characters from provided dictionaries
 
   // read dictionaries into strings
-  ifstream ifs2("plaintext_dictionary_test1.txt");
-  string dict1( ( istreambuf_iterator<char>(ifs2) ),
+  ifstream ifsD1("plaintext_dictionary_test1.txt");
+  string dict1( ( istreambuf_iterator<char>(ifsD1) ),
                 ( istreambuf_iterator<char>() ) );
-  ifs2.close();
-  ifstream ifs3("plaintext_dictionary_test2.txt");
-  string dict2( ( istreambuf_iterator<char>(ifs3) ),
+  ifsD1.close();
+  ifstream ifsD2("plaintext_dictionary_test2.txt");
+  string dict2( ( istreambuf_iterator<char>(ifsD2) ),
                 ( istreambuf_iterator<char>() ) );
-  ifs3.close();
+  ifsD2.close();
+
   // get dict1,dict2 frequencies then combine into first
   vector<int> trueFreq = genLSymbolFrequency(dict1);
   vector<int> dict2Freq = genLSymbolFrequency(dict2);
