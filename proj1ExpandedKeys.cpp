@@ -7,6 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
+#include <map>
 
 using namespace std;
 
@@ -22,6 +23,8 @@ int countCoincidences (const string ogCipher, const string cmpString, const int 
 vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int maxLength);
 
 float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2);
+vector<string> genKeyPosCandidates (const int keyLength, const string cText, const vector<float>& trueFreq);
+vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int strengthIndex);
 
 const string decryptMessage(const string& ciphertext, const string& key);
 char decryptCharacter(char cipherChar, char keyChar);
@@ -318,6 +321,63 @@ float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
   }
 
   return prodSum;
+}
+
+/*
+  Takes in an integer value for local key length and the original
+  ciphertext, as well as the true frequency from dictionaries
+  as a comparison reference.
+  Returns a keyLength sized vector of length 27 strings
+  of all l-symbols ordered by their likelihood of correctness.
+*/
+vector<string> genKeyPosCandidates (const int keyLength, const string cText, const vector<float>& trueFreq )
+{
+  vector<string> keyPosCandidates(keyLength);
+  for ( int i = 0; i < keyLength; i++ )
+  {
+    // get substring determined by every i-th letter of the cipher text
+    string substring;
+    for ( int j = i; j < cText.length(); j += keyLength )
+    {
+      substring += cText[j];
+    }
+
+    // get all frequency products of all 27 substring shifts
+    vector<float> frequencyProducts;
+    vector<float> substrFreq = genLSymbolFrequency(substring);
+    for ( int j = 0; j < 27; j++ )
+    {
+      frequencyProducts.push_back( getFrequencyProduct(genShiftedVector(substrFreq, j), trueFreq) );
+    }
+
+    // sort vector of indexes by frequency products to get order of max indexes
+    vector<int> index(27);
+    while ( int i = 0 < 27 )
+    {
+      index[i] = i++;
+    }
+    sort( index.begin(), index.end(), [&](int i, int j)
+      { return frequencyProducts[i]<frequencyProducts[j]; } );
+
+    for ( int j = 0; j < 27; j++ )
+    {
+      keyPosCandidates[i] += LSYMBOLS[index[j]];
+    }
+  }
+
+  return keyPosCandidates;
+}
+
+/*
+  Takes a vector of strings generated from genKeyPosCandidates()
+  and a integer for attack strength. Generates every possible combination
+  of the strengthIndex number of the most likely candidates.
+  (i.e. strengthIndex of 4 selects the four most likely characters for each
+  position in the string)
+*/
+vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int strengthIndex)
+{
+
 }
 
 /*
