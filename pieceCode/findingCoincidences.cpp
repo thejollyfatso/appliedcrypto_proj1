@@ -35,6 +35,9 @@ int main()
   //cout << "key length guess:" << guessKeyLength(coincidences, 24) << endl; // BAD BAD BAD hard code numbeer go to jail
   //cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
   vector<int> guess = genKeyLengthGuesses(coincidences, cText.length());
+  for ( int i = 0; i < guess.size(); i++)
+  { cout << guess[i] << ' '; }
+  cout << endl;
   /*
   for ( int i = 0; i < guess.size(); i++)
   { cout << guess[i] << ' '; }
@@ -42,7 +45,7 @@ int main()
   */
 
   //cout << "key length guess:" << guessKeyLength(guess) << endl;
-  cout << "best guesses factored | " << guessKeyLength(guess) << endl; //DEBUG message
+  //cout << "best guesses factored | " << guessKeyLength(guess) << endl; //DEBUG message
 
   return 0;
 }
@@ -106,6 +109,7 @@ int guessKeyLength(const vector<int> candidates)
 
 vector<int> genKeyLengthGuesses(const vector<int> coincidenceCount, const int maxLength)
 {
+  vector<int> candidateGuesses;
   vector<int> guesses;
   int guess;
   int mean = 0;
@@ -123,8 +127,27 @@ vector<int> genKeyLengthGuesses(const vector<int> coincidenceCount, const int ma
     if ( mean < totalCoincidences/denominator )
     {
       guess = i;
-      guesses.push_back(guess);
+      candidateGuesses.push_back(guess);
       mean = totalCoincidences/denominator;
+    }
+  }
+
+  vector<int> factors(candidateGuesses.back()+1);
+
+  for ( int i = 0; i < candidateGuesses.size(); i++ )
+  {
+    for ( int j = 2; j < candidateGuesses[i]; j++)  // keep note of j set to 2
+    {
+      if ( candidateGuesses[i] % j == 0) factors[j] += 1;
+    }
+  }
+
+  for ( int i = factors.size(); i > 1; i-- )
+  {
+    if ( factors[i] > factors[guess] ) 
+    {
+      guess = i;
+      guesses.push_back(i);
     }
   }
 
