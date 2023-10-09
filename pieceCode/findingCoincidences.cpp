@@ -13,7 +13,8 @@ using namespace std;
 // Functions
 string genShiftedString (const string ogCipher, const int shift);
 int countCoincidences (const string ogCipher, const string cmpString, const int shift);
-int guessKeyLength(const vector<int> coincidenceCount, const int maxLength);
+int guessKeyLength(const vector<int> candidates);
+vector<int> genKeyLengthGuesses(const vector<int> coincidenceCount, const int maxLength);
 
 int main()
 {
@@ -32,7 +33,15 @@ int main()
 
   // DEBUG: print result
   //cout << "key length guess:" << guessKeyLength(coincidences, 24) << endl; // BAD BAD BAD hard code numbeer go to jail
-  cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
+  //cout << "key length guess:" << guessKeyLength(coincidences, cText.length()) << endl;
+  vector<int> guess = genKeyLengthGuesses(coincidences, cText.length());
+  /*
+  for ( int i = 0; i < guess.size(); i++)
+  { cout << guess[i] << ' '; }
+  cout << endl;
+  */
+
+  cout << "key length guess:" << guessKeyLength(guess) << endl;
 
   return 0;
 }
@@ -58,8 +67,36 @@ int countCoincidences (const string ogCipher, const string cmpString, const int 
   return cnt;
 }
 
-int guessKeyLength(const vector<int> coincidenceCount, const int maxLength)
+int guessKeyLength(const vector<int> candidates)
 {
+  int guess = 0;
+  vector<int> factors(candidates.back()+1);
+
+  for ( int i = 0; i < candidates.size(); i++ )
+  {
+    for ( int j = 2; j < candidates[i]; j++)  // keep note of j set to 2
+    {
+      if ( candidates[i] % j == 0) factors[j] += 1;
+    }
+  }
+
+  for ( int i = 0; i < factors.size(); i++ )
+  {
+    if ( factors[i] > factors[guess] ) guess = i;
+  }
+
+  /*
+  for ( int i = 0; i < factors.size(); i++)
+  { cout << i << ':' << factors[i] << ' '; }
+  cout << endl;
+  */
+
+  return guess;
+}
+
+vector<int> genKeyLengthGuesses(const vector<int> coincidenceCount, const int maxLength)
+{
+  vector<int> guesses;
   int guess;
   int mean = 0;
 
@@ -76,10 +113,10 @@ int guessKeyLength(const vector<int> coincidenceCount, const int maxLength)
     if ( mean < totalCoincidences/denominator )
     {
       guess = i;
+      guesses.push_back(guess);
       mean = totalCoincidences/denominator;
-      cout<<'\n'<<i<<':'<<totalCoincidences<<'/'<<denominator<<'='<<mean<<endl;
     }
   }
 
-  return guess;
+  return guesses;
 }
