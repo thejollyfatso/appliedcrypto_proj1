@@ -19,6 +19,7 @@ vector<int> genShiftedVector (const vector<int> ogVector, const int shift);
 string genShiftedString (const string ogCipher, const int shift);
 int countCoincidences (const string ogCipher, const string cmpString, const int shift);
 vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int maxLength);
+int getFrequencyProduct (const vector<int> freq1, const vector<int> freq2);
 
 int main()
 {
@@ -44,16 +45,18 @@ int main()
   // get true frequency from dictionaries
   // read dictionaries into strings
   ifstream ifs2("plaintext_dictionary_test1.txt");
-  string dict1( ( istreambuf_iterator<char>(ifs) ),
+  string dict1( ( istreambuf_iterator<char>(ifs2) ),
                 ( istreambuf_iterator<char>() ) );
   ifs2.close();
   ifstream ifs3("plaintext_dictionary_test2.txt");
-  string dict2( ( istreambuf_iterator<char>(ifs) ),
+  string dict2( ( istreambuf_iterator<char>(ifs3) ),
                 ( istreambuf_iterator<char>() ) );
   ifs3.close();
   // get dict1,dict2 frequencies then combine into first
   vector<int> trueFreq = genLSymbolFrequency(dict1);
   vector<int> dict2Freq = genLSymbolFrequency(dict2);
+  //DEBUG
+  vector<int> testPrint = genShiftedVector(trueFreq, 1);
   for ( int i = 0; i < 27; i++ )
   {
     trueFreq[i] += dict2Freq[i];
@@ -73,6 +76,8 @@ int main()
 
       // analyze substr freq
       vector<int> substrFreq = genLSymbolFrequency(substring);
+      // i have make shifted vectors to compare
+      int freqProd = getFrequencyProduct(substrFreq, trueFreq);
 
     }
   }
@@ -100,7 +105,23 @@ vector<int> genLSymbolFrequency (const string lstring)
 
 vector<int> genShiftedVector (const vector<int> ogVector, const int shift)
 {
-  return ogVector; // obv DEBUG
+  vector<int> shiftVec;
+  for ( int i = shift; i < ogVector.size(); i++ )
+  {
+    shiftVec.push_back(ogVector[i]);
+  }
+  for ( int i = 0; i < shift; i++ )
+  {
+    shiftVec.push_back(ogVector[i]);
+  }
+
+  /*
+  for ( auto v : ogVector ) { cout << v << ' '; }
+  cout << endl;
+  for ( auto v : shiftVec ) { cout << v << ' '; }
+  */
+
+  return shiftVec; 
 }
 
 string genShiftedString (const string ogCipher, const int shift)
@@ -169,4 +190,15 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
   }
 
   return guesses;
+}
+
+int getFrequencyProduct (const vector<int> freq1, const vector<int> freq2)
+{
+  int prodSum = 0;
+  for ( int i = 0; i < 27; i++ )
+  {
+    prodSum += freq1[i] * freq2[i];
+  }
+
+  return prodSum;
 }
