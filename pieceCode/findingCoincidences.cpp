@@ -41,7 +41,8 @@ int main()
   cout << endl;
   */
 
-  cout << "key length guess:" << guessKeyLength(guess) << endl;
+  //cout << "key length guess:" << guessKeyLength(guess) << endl;
+  cout << "best guesses factored | " << guessKeyLength(guess) << endl; //DEBUG message
 
   return 0;
 }
@@ -80,11 +81,20 @@ int guessKeyLength(const vector<int> candidates)
     }
   }
 
-  for ( int i = 0; i < factors.size(); i++ )
+  vector<int> guesses;
+  //for ( int i = 0; i < factors.size(); i++ )
+  for ( int i = factors.size(); i > 1; i-- )
   {
-    if ( factors[i] > factors[guess] ) guess = i;
+    if ( factors[i] > factors[guess] ) 
+    {
+      guess = i;
+      guesses.push_back(i);
+    }
   }
 
+  for ( int i = 0; i < guesses.size(); i++)
+  { cout << guesses[i] <<':'<< factors[guesses[i]] << ' '; }
+  cout << endl;
   /*
   for ( int i = 0; i < factors.size(); i++)
   { cout << i << ':' << factors[i] << ' '; }

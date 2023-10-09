@@ -18,7 +18,7 @@ int main()
 
   string message;
   string ciphertext;
-  string key = "abc";
+  string key = " this is my key and it is very long";
 
   getline(ifs, message);
   ciphertext = encryptMessage(message, key);
