@@ -6,6 +6,9 @@
 #include <string>
 #include <fstream>
 
+#include <algorithm>
+#include <cmath>
+
 using namespace std;
 
 // Globals
@@ -23,6 +26,27 @@ float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
 
 const string decryptMessage(const string& ciphertext, const string& key);
 char decryptCharacter(char cipherChar, char keyChar);
+
+/* From Akash's old code, a scoring function to try */
+// Function to calculate the score of a plaintext based on word frequency
+int scorePlaintext(const string& plaintext, const vector<string>& dictionary) {
+    int score = 0;
+    string word = "";
+    
+    for (char c : plaintext) {
+        if (c == ' ') {
+            // Check if the word is in the dictionary
+            if (find(dictionary.begin(), dictionary.end(), word) != dictionary.end()) {
+                score++;
+            }
+            word = "";
+        } else {
+            word += c;
+        }
+    }
+    
+    return score;
+}
 
 int main()
 {
@@ -118,10 +142,41 @@ int main()
   }
 
   // DEBUG: Currently outputs series of guesses. Will need to score most accurate one somehow.
+  /*
   for ( auto key : keys )
   {
     cout << "Using key: " << key << endl << "My plaintext guess is: " << decryptMessage(cText, key) << endl << endl;
   }
+  */
+
+    // Load dictionaries for scoring
+  ifstream dictionaryFile("plaintext_dictionary_test1.txt");
+  vector<string> dictionary;
+  string word;
+  while (dictionaryFile >> word) {
+      dictionary.push_back(word);
+  }
+  dictionaryFile.close();
+  ifstream dictionaryFile2("plaintext_dictionary_test2.txt");
+    while (dictionaryFile2 >> word) {
+      dictionary.push_back(word);
+  }
+  dictionaryFile2.close();
+  // Find key with best score
+  int bestScore = 0;
+  string bestGuess;
+  for ( auto key : keys )
+  {
+    string plaintext = decryptMessage(cText,key); 
+    int currScore = scorePlaintext( plaintext, dictionary );
+    if ( bestScore < currScore )
+    {
+      bestScore = currScore;
+      bestGuess = plaintext;
+    }
+  }
+
+  cout << "My guess for the plaintext is:\n" << bestGuess << endl;
 
   return 0;
 }
