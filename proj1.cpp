@@ -94,6 +94,7 @@ int main()
       for ( int i = 0; i < 27; i++ )
       {
         // comparing each possible shift of the substring to true frequency
+        // the highest frequency product will be the most similar
         float freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
         if ( freqProd > maxFreq ) 
         {
@@ -121,7 +122,8 @@ int main()
 
 /*
   Takes a string and scans through for occurrences of each L-symbol.
-  Returns a length-27 vector of integers uh oh lmao
+  Returns a length-27 vector of floats representing the ratio frequency
+  of each l-symbol.
 */
 vector<float> genLSymbolFrequency (const string lstring)
 {
@@ -146,6 +148,11 @@ vector<float> genLSymbolFrequency (const string lstring)
   return freqs;
 }
 
+/*
+  Takes in a l-symbol frequency map represented as a vector of floats
+  and shifts it backwards by int shift, wrapping around.
+  Returns the shifted vector.
+*/
 vector<float> genShiftedVector (const vector<float> ogVector, const int shift)
 {
   vector<float> shiftVec;
@@ -161,6 +168,10 @@ vector<float> genShiftedVector (const vector<float> ogVector, const int shift)
   return shiftVec; 
 }
 
+/*
+  Takes in a string and shifts it forwards by int shift and
+  returns the shifted string.
+*/
 string genShiftedString (const string ogCipher, const int shift)
 {
   string shiftString;
@@ -171,6 +182,12 @@ string genShiftedString (const string ogCipher, const int shift)
   return shiftString;
 }
 
+/*
+  Takes in two strings and an integer.  One string represents the
+  original ciphertext, the other represents the ciphertext after
+  forward shifting by int shift. Returns the number of coincidences
+  or matching characters at shifted indices between the two strings.
+*/
 int countCoincidences (const string ogCipher, const string cmpString, const int shift)
 {
   int cnt = 0;
@@ -182,23 +199,31 @@ int countCoincidences (const string ogCipher, const string cmpString, const int 
   return cnt;
 }
 
+/*
+  Follows countCoincidences. Takes in the vector assumedly generated
+  by countCoincidences along with the maxLength we will scan for the key.
+  It will return a set of candidate key lengths as a vector of ints.
+*/
 vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int maxLength)
 {
-  vector<int> candidateGuesses;
-  vector<int> guesses;
+  vector<int> candidateGuesses; // candidates determined by coincidences
+  vector<int> guesses;          // guesses to be returned after factoring
   int guess;
   int mean = 0;
 
+  // for each possible size of key, represented by i
   for ( int i = 1; i < maxLength; i++ )
   {
     int totalCoincidences = 0;
     int denominator = 0;
+    // determine the average number of coincidences every i-th character
     for ( int j = 0; j < coincidenceCount.size(); j += i )
     {
       totalCoincidences += coincidenceCount[j];
       denominator++;
     }
     
+    // if average is the highest so far, replace guess, add to candidates
     if ( mean < totalCoincidences/denominator )
     {
       guess = i;
@@ -207,8 +232,10 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
     }
   }
 
+  // sort out superfluous multiples
   vector<int> factors(candidateGuesses.back()+1);
 
+  // from candidates, determine commonly occuring factors
   for ( int i = 0; i < candidateGuesses.size(); i++ )
   {
     for ( int j = 1; j < candidateGuesses[i]; j++)  
@@ -217,6 +244,7 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
     }
   }
 
+  // as with previous candidates, update best key legnth guesses
   for ( int i = factors.size(); i > 1; i-- )
   {
     if ( factors[i] > factors[guess] ) 
@@ -229,6 +257,10 @@ vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int m
   return guesses;
 }
 
+/*
+  Takes two frequency maps represented as vectors of floats and
+  sums the product of the floats at each index.
+*/
 float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
 {
   float prodSum = 0;
@@ -240,6 +272,9 @@ float getFrequencyProduct (const vector<float> freq1, const vector<float> freq2)
   return prodSum;
 }
 
+/*
+  Given ciphertext and key, returns the plaintext that would result.
+*/
 const string decryptMessage(const string& ciphertext, const string& key)
 {
   // decrypt each character in the message
@@ -252,6 +287,10 @@ const string decryptMessage(const string& ciphertext, const string& key)
   return message;
 }
 
+/*
+  Helper function to decryptMessage.
+  Given the cipher character and key character, returns plain character.
+*/
 char decryptCharacter(char cipherChar, char keyChar)
 {
   char decryptedChar;
