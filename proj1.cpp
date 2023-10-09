@@ -15,22 +15,25 @@ string LSYMBOLS = " abcdefghijklmnopqrstuvwxyz";
 vector<int> genLSymbolFrequency (const string lstring);
 vector<int> genShiftedVector (const vector<int> ogVector, const int shift);
 string genShiftedString (const string ogCipher, const int shift);
+
 int countCoincidences (const string ogCipher, const string cmpString, const int shift);
 vector<int> genKeyLengthGuesses (const vector<int> coincidenceCount, const int maxLength);
+
 int getFrequencyProduct (const vector<int> freq1, const vector<int> freq2);
+
 const string decryptMessage(const string& ciphertext, const string& key);
 char decryptCharacter(char cipherChar, char keyChar);
 
 int main()
 {
-  // read in ciphertext
+  // read in ciphertext to string cText
   ifstream ifs("cipher.txt");
   string cText( ( istreambuf_iterator<char>(ifs) ),
                 ( istreambuf_iterator<char>() ) );
   ifs.close();
 
   /* Coincidence Indexing to determine likely key lengths */
-  // for length of string, count coincidences of resulting shift of i
+  // for length of string, count coincidences b/w resulting shift of i
   vector<int> coincidences;
   for ( int i = 0; i < cText.length(); i++ )
   {
@@ -42,7 +45,8 @@ int main()
   vector<int> keyLengthCandidates = genKeyLengthGuesses(coincidences, cText.length());
 
   /* Frequency Analysis to guess keys */
-  // get true frequency from dictionaries
+  // get true frequency of characters from provided dictionaries
+
   // read dictionaries into strings
   ifstream ifs2("plaintext_dictionary_test1.txt");
   string dict1( ( istreambuf_iterator<char>(ifs2) ),
@@ -62,24 +66,27 @@ int main()
 
   // generate possible keys from frequencies
   vector<string> keys;
+  // for each possible length determined previously through coincidences
   for ( auto length : keyLengthCandidates )
   {
+    // determine most likely key character for each character of key
     string candidateKey;
     for ( int i = 0; i < length; i++ )
     {
+      // get substring determined by every i-th letter of the cipher text
       string substring;
       for ( int j = i; j < cText.length(); j += length )
       {
-        // for every length-th element add to substring
         substring += cText[j];
       }
 
-      // analyze substr freq
+      // find the most likely "shift" of L-symbol frequency
       vector<int> substrFreq = genLSymbolFrequency(substring);
       int maxFreq = 0;
       int guess;
       for ( int i = 0; i < 27; i++ )
       {
+        // comparing each possible shift of the substring to true frequency
         int freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
         if ( freqProd > maxFreq ) 
         {
@@ -87,13 +94,14 @@ int main()
           guess = i;
         }
       }
-      // after finding most likely key char, append
+      // after finding most likely key char, append to key guess
       candidateKey += LSYMBOLS[guess];
     }
 
     keys.push_back(candidateKey);
   }
 
+  // DEBUG: Currently outputs series of guesses. Will need to score most accurate one somehow.
   for ( auto key : keys )
   {
     cout << "Using key: " << key << endl << "My plaintext guess is: " << decryptMessage(cText, key) << endl << endl;
