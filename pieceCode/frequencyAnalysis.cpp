@@ -65,6 +65,7 @@ int main()
   // get frequencies from possible keys
   for ( auto length : keyLengthCandidates )
   {
+    string candidateKey;
     for ( int i = 0; i < length; i++ )
     {
       string substring;
@@ -76,10 +77,21 @@ int main()
 
       // analyze substr freq
       vector<int> substrFreq = genLSymbolFrequency(substring);
-      // i have make shifted vectors to compare
-      int freqProd = getFrequencyProduct(substrFreq, trueFreq);
-
+      int maxFreq = 0;
+      int guess;
+      for ( int i = 0; i < 27; i++ )
+      {
+        int freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
+        if ( freqProd > maxFreq ) 
+        {
+          maxFreq = freqProd;
+          guess = i;
+        }
+      }
+      // after finding most likely key char, append
+      candidateKey += LSYMBOLS[guess];
     }
+    cout << candidateKey << endl;
   }
 
   return 0;
