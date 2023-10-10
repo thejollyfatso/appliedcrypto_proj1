@@ -90,10 +90,10 @@ int main()
 
   // generate possible keys from frequencies
   vector<string> keys;
-  int atkStrength = 4; // see genKeyCandidates() for more on strength
-  for ( int i = 0; i < keyLengthCandidates.size(); i++ )
+  int atkStrength = 1; // see genKeyCandidates() for more on strength
+  for ( int i = 1; i < keyLengthCandidates.size(); i++ )
   {
-    vector<string> keyPosCandidates = genKeyPosCandidates( i, cText, trueFreq );
+    vector<string> keyPosCandidates = genKeyPosCandidates( keyLengthCandidates[i], cText, trueFreq );
     vector<string> keyCandidates = genPossibleKeys( keyPosCandidates, atkStrength );
     for ( auto kc : keyCandidates )
     {
@@ -364,7 +364,6 @@ vector<string> genKeyPosCandidates (const int keyLength, const string cText, con
 vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int strengthIndex)
 {
   vector<string> possibleKeys;
-  // keleks breath this is gonna be slow
   vector<int> incrementer (keyPosCandidates.size()); // key sized vector
   while ( accumulate( incrementer.begin(), incrementer.end(), 0 ) <=
           keyPosCandidates.size() * strengthIndex )
@@ -376,8 +375,13 @@ vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int
       possibleKey += keyPosCandidates[j][incrementer[j]];
     }
     possibleKeys.push_back(possibleKey);
+    cout << possibleKey << '\n'; // DEBUG
 
     // increment the incrementer, base strengthIndex
+    int inc = 0; // functions as a temporary placeholder for index
+    while ( incrementer[inc] > strengthIndex ) { inc++; }
+    incrementer[inc]++;
+    if ( inc > 0 ) { incrementer[inc-1] = 0; };
   }
 
   return possibleKeys;
