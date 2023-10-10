@@ -94,19 +94,12 @@ int main()
   for ( int i = 1; i < keyLengthCandidates.size(); i++ )
   {
     vector<string> keyPosCandidates = genKeyPosCandidates( keyLengthCandidates[i], cText, trueFreq );
-    vector<string> keyCandidates = genPossibleKeys( keyPosCandidates, atkStrength );
+    vector<string> keyCandidates = genPossibleKeys( keyPosCandidates, atkStrength-1 );
     for ( auto kc : keyCandidates )
     {
       keys.push_back(kc);
     }
   }
-  //DEBUG
-  /*
-  for ( auto k : keys )
-  {
-    cout << k << ' ';
-  }
-  */
 
   // Load both dictionary files into vector of strings for a compiled dictionary
   ifstream dictionaryFile("plaintext_dictionary_test1.txt");
@@ -133,13 +126,13 @@ int main()
   dictionaryFile2.close();
 
   // Find key with best score
-  /*
   int bestScore = 0;
   string bestGuess;
   for ( auto key : keys )
   {
     string plaintext = decryptMessage(cText,key); 
     int currScore = scorePlaintext( plaintext, dictionary );
+    cerr << currScore << endl;
     if ( bestScore < currScore )
     {
       bestScore = currScore;
@@ -148,7 +141,6 @@ int main()
   }
 
   cout << "My guess for the plaintext is:\n" << bestGuess << endl;
-  */
 
   return 0;
 }
@@ -342,7 +334,7 @@ vector<string> genKeyPosCandidates (const int keyLength, const string cText, con
       index[idx] = idx++;
     }
     sort( index.begin(), index.end(), [&](int i, int j)
-      { return frequencyProducts[i]<frequencyProducts[j]; } );
+      { return frequencyProducts[i]>frequencyProducts[j]; } );
 
     for ( int j = 0; j < 27; j++ )
     {
@@ -365,24 +357,41 @@ vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int
 {
   vector<string> possibleKeys;
   vector<int> incrementer (keyPosCandidates.size()); // key sized vector
-  while ( accumulate( incrementer.begin(), incrementer.end(), 0 ) <=
+  
+  // this is a bandaid fix to get the first key in
+  string firstKey;
+  for ( int j = 0; j < keyPosCandidates.size(); j++ )
+  {
+    firstKey += keyPosCandidates[j][incrementer[j]];
+  }
+  possibleKeys.push_back(firstKey);
+
+  while ( accumulate( incrementer.begin(), incrementer.end(), 0 ) <
           keyPosCandidates.size() * strengthIndex )
   {
-    // first add resulting key from incrementer
+    // increment the incrementer, base strengthIndex
+    int inc = 0; // functions as a temporary placeholder for index
+    while ( incrementer[inc] >= strengthIndex && inc < incrementer.size() ) { inc++; }
+    incrementer[inc]++;
+    if ( inc > 0 && inc < incrementer.size() ) 
+    { 
+      int dec = inc-1;
+      while ( incrementer[dec] >= strengthIndex )
+      {
+        incrementer[dec--] = 0;
+      }
+    }
+
+    // add resulting key from incrementer
     string possibleKey;
     for ( int j = 0; j < keyPosCandidates.size(); j++ )
     {
       possibleKey += keyPosCandidates[j][incrementer[j]];
     }
     possibleKeys.push_back(possibleKey);
-    cout << possibleKey << '\n'; // DEBUG
+    cerr << possibleKey << endl;//DEBUG
 
-    // increment the incrementer, base strengthIndex
-    int inc = 0; // functions as a temporary placeholder for index
-    while ( incrementer[inc] > strengthIndex ) { inc++; }
-    incrementer[inc]++;
-    if ( inc > 0 ) { incrementer[inc-1] = 0; };
-  }
+  } 
 
   return possibleKeys;
 }
