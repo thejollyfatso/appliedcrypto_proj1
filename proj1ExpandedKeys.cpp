@@ -373,11 +373,27 @@ vector<string> genKeyPosCandidates (const int keyLength, const string cText, con
   and a integer for attack strength. Generates every possible combination
   of the strengthIndex number of the most likely candidates.
   (i.e. strengthIndex of 4 selects the four most likely characters for each
-  position in the string)
+  position in the string. Note a strength index of 27 results in a complete
+  brute force attack)
 */
 vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int strengthIndex)
 {
+  vector<string> possibleKeys;
+  // keleks breath this is gonna be slow
+  for ( int i = 0; i < pow( strengthIndex, keyPosCandidates.size() ); i++ )
+  {
+    string possibleKey;
+    for ( int j = 0; j < keyPosCandidates.size(); j++ )
+    {
+      for ( int k = 0; k < strengthIndex; k++) 
+      {
+        possibleKey += keyPosCandidates[j][k];
+      }
+    }
+    possibleKeys.push_back(possibleKey);
+  }
 
+  return possibleKeys;
 }
 
 /*
