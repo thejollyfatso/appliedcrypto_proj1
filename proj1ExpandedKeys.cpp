@@ -7,7 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
-#include <map>
+#include <numeric>
 
 using namespace std;
 
@@ -90,41 +90,23 @@ int main()
 
   // generate possible keys from frequencies
   vector<string> keys;
-  // for each possible length determined previously through coincidences
-  for ( auto length : keyLengthCandidates )
+  int atkStrength = 4; // see genKeyCandidates() for more on strength
+  for ( int i = 0; i < keyLengthCandidates.size(); i++ )
   {
-    // determine most likely key character for each character of key
-    string candidateKey;
-    for ( int i = 0; i < length; i++ )
+    vector<string> keyPosCandidates = genKeyPosCandidates( i, cText, trueFreq );
+    vector<string> keyCandidates = genPossibleKeys( keyPosCandidates, atkStrength );
+    for ( auto kc : keyCandidates )
     {
-      // get substring determined by every i-th letter of the cipher text
-      string substring;
-      for ( int j = i; j < cText.length(); j += length )
-      {
-        substring += cText[j];
-      }
-
-      // find the most likely "shift" of L-symbol frequency
-      vector<float> substrFreq = genLSymbolFrequency(substring);
-      float maxFreq = 0;
-      int guess = 0;
-      for ( int i = 0; i < 27; i++ )
-      {
-        // comparing each possible shift of the substring to true frequency
-        // the highest frequency product will be the most similar
-        float freqProd = getFrequencyProduct(genShiftedVector(substrFreq, i), trueFreq);
-        if ( freqProd > maxFreq ) 
-        {
-          maxFreq = freqProd;
-          guess = i;
-        }
-      }
-      // after finding most likely key char, append to key guess
-      candidateKey += LSYMBOLS[guess];
+      keys.push_back(kc);
     }
-
-    keys.push_back(candidateKey);
   }
+  //DEBUG
+  /*
+  for ( auto k : keys )
+  {
+    cout << k << ' ';
+  }
+  */
 
   // Load both dictionary files into vector of strings for a compiled dictionary
   ifstream dictionaryFile("plaintext_dictionary_test1.txt");
@@ -151,6 +133,7 @@ int main()
   dictionaryFile2.close();
 
   // Find key with best score
+  /*
   int bestScore = 0;
   string bestGuess;
   for ( auto key : keys )
@@ -165,6 +148,7 @@ int main()
   }
 
   cout << "My guess for the plaintext is:\n" << bestGuess << endl;
+  */
 
   return 0;
 }
@@ -352,9 +336,10 @@ vector<string> genKeyPosCandidates (const int keyLength, const string cText, con
 
     // sort vector of indexes by frequency products to get order of max indexes
     vector<int> index(27);
-    while ( int i = 0 < 27 )
+    int idx = 0;
+    while ( idx < 27 )
     {
-      index[i] = i++;
+      index[idx] = idx++;
     }
     sort( index.begin(), index.end(), [&](int i, int j)
       { return frequencyProducts[i]<frequencyProducts[j]; } );
@@ -380,17 +365,19 @@ vector<string> genPossibleKeys (const vector<string> keyPosCandidates, const int
 {
   vector<string> possibleKeys;
   // keleks breath this is gonna be slow
-  for ( int i = 0; i < pow( strengthIndex, keyPosCandidates.size() ); i++ )
+  vector<int> incrementer (keyPosCandidates.size()); // key sized vector
+  while ( accumulate( incrementer.begin(), incrementer.end(), 0 ) <=
+          keyPosCandidates.size() * strengthIndex )
   {
+    // first add resulting key from incrementer
     string possibleKey;
     for ( int j = 0; j < keyPosCandidates.size(); j++ )
     {
-      for ( int k = 0; k < strengthIndex; k++) 
-      {
-        possibleKey += keyPosCandidates[j][k];
-      }
+      possibleKey += keyPosCandidates[j][incrementer[j]];
     }
     possibleKeys.push_back(possibleKey);
+
+    // increment the incrementer, base strengthIndex
   }
 
   return possibleKeys;
