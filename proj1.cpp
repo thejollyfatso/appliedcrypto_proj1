@@ -31,6 +31,7 @@ int scorePlaintext(const string& plaintext, const vector<string>& dictionary);
 int main()
 {
   // read in ciphertext to string cText
+  /*
   ifstream ifsC("cipher.txt");
   if (!ifsC)
   {
@@ -41,6 +42,9 @@ int main()
                 ( istreambuf_iterator<char>() ) );
   ifsC.close();
   cText.pop_back(); // get rid of superfluous newline character
+  */
+  string cText;
+  cin >> cText;
 
   /* Coincidence Indexing to determine likely key lengths */
   // for length of string, count coincidences b/w resulting shift of i
